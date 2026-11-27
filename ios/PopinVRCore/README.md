@@ -6,6 +6,7 @@ This Swift package is the native iOS foundation being developed alongside the fa
 
 - `PopinVRHeadTracker`: ARKit world tracking and a thread-safe latest 6DoF camera pose.
 - `PopinVRStereoRig`: parallel-axis, off-axis left/right eye camera matrices derived from the ARKit pose.
+- `PopinVRStereoHeadsetRenderer`: a Metal split-screen stereo grid renderer for checking world-locked 6DoF response.
 - `PopinVRVisionHandTracker`: native Vision two-hand 2D keypoints. This is only the 2D front-end, not the final 3D hand solution.
 
 ## Integration
