@@ -74,10 +74,10 @@ public final class PopinVRStereoHeadsetRenderer: NSObject, MTKViewDelegate {
         }
 
         let vertices = Self.makeGridVertices()
-        guard let buffer = vertices.withUnsafeBytes({ raw in
+        guard let buffer = vertices.withUnsafeBytes { (raw: UnsafeRawBufferPointer) -> MTLBuffer? in
             guard let base = raw.baseAddress else { return nil }
             return device.makeBuffer(bytes: base, length: raw.count, options: .storageModeShared)
-        }) else {
+        } else {
             return nil
         }
 
