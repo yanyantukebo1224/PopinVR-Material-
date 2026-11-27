@@ -17,7 +17,7 @@ public final class PopinVRHandTrackingPipeline {
     private let tracker: PopinVRVisionHandTracker
     private let preprocessor = PopinVRHaMeRPreprocessor()
     private let haMeRModel: PopinVRHaMeRCoreMLModel?
-    private let queue = DispatchQueue(label: "popinvr.hand.inference", qos: .userInitiative)
+    private let queue = DispatchQueue(label: "popinvr.hand.inference", qos: .userInitiated)
     private let lock = NSLock()
     private var busy = false
     private var nextAllowedTimestamp: TimeInterval = 0
