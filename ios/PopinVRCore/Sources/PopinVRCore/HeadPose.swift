@@ -2,7 +2,7 @@ import ARKit
 import Foundation
 import simd
 
-public enum PopinVRTrackingQuality: Sendable {
+public enum PopinVRTrackingQuality: Sendable, Equatable {
     case normal
     case limited
     case unavailable
