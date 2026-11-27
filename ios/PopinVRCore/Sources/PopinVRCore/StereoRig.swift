@@ -24,19 +24,22 @@ public struct PopinVRStereoRig: Sendable {
     public var convergenceDistance: Float
     public var nearPlane: Float
     public var farPlane: Float
+    public var lensProfile: PopinVRLensProfile?
 
     public init(
         interpupillaryDistance: Float = 0.064,
         verticalFieldOfViewRadians: Float = .pi / 2,
         convergenceDistance: Float = 2.0,
         nearPlane: Float = 0.03,
-        farPlane: Float = 100.0
+        farPlane: Float = 100.0,
+        lensProfile: PopinVRLensProfile? = .cardboardV2IPhone16e
     ) {
         self.interpupillaryDistance = interpupillaryDistance
         self.verticalFieldOfViewRadians = verticalFieldOfViewRadians
         self.convergenceDistance = convergenceDistance
         self.nearPlane = nearPlane
         self.farPlane = farPlane
+        self.lensProfile = lensProfile
     }
 
     public func views(worldFromCamera: simd_float4x4, eyeAspectRatio: Float) -> [PopinVREyeView] {
@@ -46,11 +49,13 @@ public struct PopinVRStereoRig: Sendable {
 
     private func makeView(_ eye: PopinVREye, worldFromCamera: simd_float4x4, aspect: Float) -> PopinVREyeView {
         let halfIPD = interpupillaryDistance * 0.5
-        let localOffset = SIMD3<Float>(eye.sign * halfIPD, 0, 0)
+        let effectiveIPD = lensProfile?.interpupillaryDistance ?? interpupillaryDistance
+        let localOffset = SIMD3<Float>(eye.sign * effectiveIPD * 0.5, 0, 0)
         let translation = simd_float4x4(translation: localOffset)
         let worldFromEye = worldFromCamera * translation
         let view = simd_inverse(worldFromEye)
-        let projection = makeProjection(aspect: max(aspect, 0.01), eyeSign: eye.sign)
+        let projection = lensProfile?.projectionMatrix(eye, near: nearPlane, far: farPlane)
+            ?? makeProjection(aspect: max(aspect, 0.01), eyeSign: eye.sign)
         return PopinVREyeView(eye: eye, worldFromEye: worldFromEye, viewMatrix: view, projectionMatrix: projection)
     }
 
