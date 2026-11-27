@@ -8,7 +8,7 @@ public enum PopinVRHandedness: Sendable {
 }
 
 /// A complete per-frame mesh payload for the stereo renderer.
-/// Vertices are expressed in camera coordinates, metres; faces are triangle indices.
+/// Vertices and joints are expressed in hand-local coordinates, metres; cameraFromHand places them in the camera frame. Faces are triangle indices.
 /// The source pipeline is expected to produce the 2,859-vertex SOMA-X topology.
 public struct PopinVRHandMeshFrame: Sendable {
     public let timestamp: TimeInterval
