@@ -20,6 +20,7 @@ jobs:
       - name: Show Xcode version
         run: xcodebuild -version
       - name: Build for iOS Simulator
+        working-directory: ios/PopinVRCore
         run: |
           xcodebuild \
             -scheme PopinVRCore \
