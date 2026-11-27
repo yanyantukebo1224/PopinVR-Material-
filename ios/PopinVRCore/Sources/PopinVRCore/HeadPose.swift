@@ -1,5 +1,6 @@
 import ARKit
 import Foundation
+import CoreVideo
 import simd
 
 public enum PopinVRTrackingQuality: Sendable, Equatable {
@@ -28,6 +29,8 @@ public final class PopinVRHeadTracker: NSObject, ARSessionDelegate {
 
     private let lock = NSLock()
     private var storedPose: PopinVRHeadPose?
+    /// Receives ARKit camera frames on the session delegate queue. Consumers should enqueue work and return quickly.
+    public var onFrame: ((CVPixelBuffer, TimeInterval, simd_float3x3, simd_float4x4) -> Void)?
     private let callbackQueue = DispatchQueue(label: "popinvr.arkit.delegate", qos: .userInteractive)
 
     public override init() {
@@ -82,6 +85,7 @@ public final class PopinVRHeadTracker: NSObject, ARSessionDelegate {
         lock.lock()
         storedPose = pose
         lock.unlock()
+        onFrame?(frame.capturedImage, frame.timestamp, frame.camera.intrinsics, frame.camera.transform)
     }
 }
 
