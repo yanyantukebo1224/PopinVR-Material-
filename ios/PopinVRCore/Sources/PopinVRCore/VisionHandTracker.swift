@@ -46,7 +46,7 @@ public final class PopinVRVisionHandTracker {
             let points = recognized.compactMap { key, point -> PopinVRHandPoint? in
                 guard point.confidence > 0.05 else { return nil }
                 return PopinVRHandPoint(
-                    name: key.rawValue,
+                    name: String(describing: key),
                     x: Float(point.location.x),
                     y: Float(point.location.y),
                     confidence: Float(point.confidence)
