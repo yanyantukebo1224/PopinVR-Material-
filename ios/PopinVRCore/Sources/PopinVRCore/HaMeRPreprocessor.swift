@@ -110,7 +110,7 @@ public final class PopinVRHaMeRPreprocessor {
         let y0 = (1 - maxY) * Float(height)
         let y1 = (1 - minY) * Float(height)
         guard x1 > x0, y1 > y0 else { return nil }
-        return CGRect(x: x0, y: y0, width: x1 - x0, height: y1 - y0)
+        return CGRect(x: CGFloat(x0), y: CGFloat(y0), width: CGFloat(x1 - x0), height: CGFloat(y1 - y0))
     }
 
     private static func makeTensor(
@@ -127,9 +127,9 @@ public final class PopinVRHaMeRPreprocessor {
         let scale = boxSize / Float(side)
 
         for y in 0..<side {
-            let sourceY = center.y + (Float(y) + 0.5 - Float(side) * 0.5) * scale
+            let sourceY = center.y + (Float(y) - Float(side) * 0.5) * scale
             for x in 0..<side {
-                let deltaX = (Float(x) + 0.5 - Float(side) * 0.5) * scale
+                let deltaX = (Float(x) - Float(side) * 0.5) * scale
                 let sourceX = center.x + (mirrorHorizontally ? -deltaX : deltaX)
                 let rgb = sampleBGRA(
                     bytes, bytesPerRow: bytesPerRow, width: imageWidth, height: imageHeight,
@@ -152,8 +152,8 @@ public final class PopinVRHaMeRPreprocessor {
         x: Float,
         y: Float
     ) -> SIMD3<Float> {
-        let px = x - 0.5
-        let py = y - 0.5
+        let px = x
+        let py = y
         let x0 = Int(floor(px)), y0 = Int(floor(py))
         let fx = px - Float(x0), fy = py - Float(y0)
 
