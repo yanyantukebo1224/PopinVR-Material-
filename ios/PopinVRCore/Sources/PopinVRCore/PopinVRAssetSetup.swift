@@ -25,6 +25,7 @@ public final class PopinVRAssetSetup: ObservableObject {
     public struct Assets {
         public let hamerModelURL: URL
         public let compiledHaMeRURL: URL
+        public let compiledSOMARegressorURL: URL
         public let somaDirectoryURL: URL
         public let somaRegressorURL: URL
         public let somaParametersURL: URL
@@ -81,6 +82,7 @@ public final class PopinVRAssetSetup: ObservableObject {
             }
 
             let compiledURL = baseURL.appendingPathComponent("hamer_params.compiled", isDirectory: true)
+            let compiledSOMAURL = baseURL.appendingPathComponent("mano2somax_regressor_fp32.compiled", isDirectory: true)
             if !fileManager.fileExists(atPath: compiledURL.path) {
                 state = .compilingModel
                 detail = "Compiling HaMeR for this iPhone. First launch can take a while…"
@@ -90,12 +92,22 @@ public final class PopinVRAssetSetup: ObservableObject {
                 }
                 try fileManager.moveItem(at: temporary, to: compiledURL)
             }
+            if !fileManager.fileExists(atPath: compiledSOMAURL.path) {
+                state = .compilingModel
+                detail = "Compiling SOMA-X hand regressor…"
+                let temporary = try MLModel.compileModel(at: somaRegressor)
+                if fileManager.fileExists(atPath: compiledSOMAURL.path) {
+                    try fileManager.removeItem(at: compiledSOMAURL)
+                }
+                try fileManager.moveItem(at: temporary, to: compiledSOMAURL)
+            }
 
             state = .ready
             detail = "All required models are installed."
             return Assets(
                 hamerModelURL: modelPackage,
                 compiledHaMeRURL: compiledURL,
+                compiledSOMARegressorURL: compiledSOMAURL,
                 somaDirectoryURL: somaDir,
                 somaRegressorURL: somaRegressor,
                 somaParametersURL: somaParams
