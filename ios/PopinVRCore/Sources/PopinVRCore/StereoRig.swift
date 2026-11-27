@@ -61,7 +61,7 @@ public struct PopinVRStereoRig: Sendable {
         let yScale = 1 / tanHalfVertical
         let xScale = yScale / aspect
         // Off-axis shift makes the two parallel cameras converge at convergenceDistance.
-        let horizontalShift = eyeSign * xScale * (interpupillaryDistance * 0.5) / max(convergenceDistance, 0.05)
+        let horizontalShift = -eyeSign * xScale * (interpupillaryDistance * 0.5) / max(convergenceDistance, 0.05)
 
         return simd_float4x4(columns: (
             SIMD4<Float>(xScale, 0, 0, 0),
