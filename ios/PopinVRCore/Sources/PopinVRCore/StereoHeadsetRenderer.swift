@@ -8,7 +8,6 @@ import simd
 public final class PopinVRStereoHeadsetRenderer: NSObject, MTKViewDelegate {
     public let headTracker: PopinVRHeadTracker
     public var stereoRig: PopinVRStereoRig
-    public var floorHeight: Float = -1.2
 
     private let device: MTLDevice
     private let commandQueue: MTLCommandQueue
@@ -25,6 +24,7 @@ public final class PopinVRStereoHeadsetRenderer: NSObject, MTKViewDelegate {
             return nil
         }
 
+        view.colorPixelFormat = .bgra8Unorm
         let descriptor = MTLRenderPipelineDescriptor()
         descriptor.vertexFunction = vertex
         descriptor.fragmentFunction = fragment
@@ -50,7 +50,6 @@ public final class PopinVRStereoHeadsetRenderer: NSObject, MTKViewDelegate {
         super.init()
 
         view.device = device
-        view.colorPixelFormat = .bgra8Unorm
         view.framebufferOnly = true
         view.preferredFramesPerSecond = 60
         view.delegate = self
@@ -88,11 +87,6 @@ public final class PopinVRStereoHeadsetRenderer: NSObject, MTKViewDelegate {
                 &viewProjection,
                 length: MemoryLayout<simd_float4x4>.stride,
                 index: 1
-            )
-            encoder.setFragmentBytes(
-                &floorHeight,
-                length: MemoryLayout<Float>.stride,
-                index: 0
             )
             encoder.drawPrimitives(type: .line, vertexStart: 0, vertexCount: gridVertexCount)
         }
