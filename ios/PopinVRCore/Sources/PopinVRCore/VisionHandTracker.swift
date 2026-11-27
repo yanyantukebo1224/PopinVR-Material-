@@ -54,7 +54,7 @@ public final class PopinVRVisionHandTracker {
             }.sorted { $0.name < $1.name }
 
             return PopinVRHandObservation(
-                isRightHand: observation chiralityValue,
+                isRightHand: observation.chiralityValue,
                 confidence: Float(observation.confidence),
                 points: points
             )
