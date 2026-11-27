@@ -1,29 +1,54 @@
-name: iOS Core Package
+name: PopinVR iOS Build
 
 on:
   push:
     branches: [main, "popinvr/**"]
     paths:
       - "ios/PopinVRCore/**"
+      - "ios/PopinVRApp/**"
       - ".github/workflows/ios-core-ci.yml"
   pull_request:
     paths:
       - "ios/PopinVRCore/**"
+      - "ios/PopinVRApp/**"
       - ".github/workflows/ios-core-ci.yml"
   workflow_dispatch:
 
 jobs:
-  build-ios-package:
+  build-ios:
     runs-on: macos-15
     steps:
       - uses: actions/checkout@v4
       - name: Show Xcode version
         run: xcodebuild -version
-      - name: Build for iOS Simulator
-        working-directory: ios/PopinVRCore
+      - name: Install XcodeGen
+        run: brew install xcodegen
+      - name: Generate Xcode project
+        working-directory: ios/PopinVRApp
+        run: xcodegen generate --spec project.yml
+      - name: Build iOS device app (unsigned)
+        working-directory: ios/PopinVRApp
         run: |
           xcodebuild \
-            -scheme PopinVRCore \
-            -destination 'generic/platform=iOS Simulator' \
+            -project PopinVR.xcodeproj \
+            -scheme PopinVR \
+            -sdk iphoneos \
+            -configuration Release \
             -derivedDataPath "$RUNNER_TEMP/PopinVRDerivedData" \
+            CODE_SIGNING_ALLOWED=NO \
             build
+      - name: Package unsigned IPA
+        run: |
+          APP="$RUNNER_TEMP/PopinVRDerivedData/Build/Products/Release-iphoneos/PopinVR.app"
+          test -d "$APP"
+          mkdir -p "$RUNNER_TEMP/ipa/Payload"
+          cp -R "$APP" "$RUNNER_TEMP/ipa/Payload/PopinVR.app"
+          cd "$RUNNER_TEMP/ipa"
+          /usr/bin/zip -qry "$GITHUB_WORKSPACE/PopinVR-unsigned.ipa" Payload
+      - name: Upload IPA artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: PopinVR-unsigned-IPA
+          path: PopinVR-unsigned.ipa
+          if-no-files-found: error
+          retention-days: 14
