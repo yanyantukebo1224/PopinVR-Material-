@@ -10,7 +10,7 @@ This Swift package is the native iOS runtime foundation being developed alongsid
 - Vision two-hand 2D keypoints and a bounded asynchronous HaMeR preprocessing/inference pipeline.
 - Native Core ML adapter for HaMeR parameter outputs.
 - SOMA-X geometry C target and a 3D hand mesh frame contract.
-- First-run asset setup: automatically downloads the HaMeR (~470 MB) and SOMA-X (~40 MB) release archives, verifies their SHA-256 digests, extracts them, and compiles HaMeR before the AR session is allowed to start.
+- First-run asset setup: automatically downloads the HaMeR (~470 MB) and SOMA-X (~40 MB) release archives, verifies their SHA-256 digests, extracts them, and compiles both HaMeR and the SOMA-X regressor before the AR session is allowed to start.
 - World-anchored spatial-window state and a shared ray/plane hit-test API.
 - A WKWebView browser surface configured for inline website playback, including YouTube's normal web player.
 
