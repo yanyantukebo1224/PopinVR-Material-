@@ -1,16 +1,22 @@
 import ARKit
 import AVFoundation
+import CoreML
 import MetalKit
 import UIKit
 
-/// Drop-in iOS view controller for the first PopinVR headset smoke test.
-/// The host app must include NSCameraUsageDescription in its Info.plist.
+/// Drop-in iOS view controller for PopinVR.
+/// Model installation is a blocking first-run gate: AR tracking and the headset
+/// renderer are not started until HaMeR + SOMA-X assets are verified and compiled.
 public final class PopinVRHeadsetViewController: UIViewController {
     private var headTracker: PopinVRHeadTracker?
     private var renderer: PopinVRStereoHeadsetRenderer?
     private var metalView: MTKView?
     private var handPipeline: PopinVRHandTrackingPipeline?
+    private let assetSetup = PopinVRAssetSetup()
+    private var statusLabel: UILabel?
     private var hasStartedSession = false
+    private var isPreparingAssets = false
+    private var preparedAssets: PopinVRAssetSetup.Assets?
 
     public override func viewDidLoad() {
         super.viewDidLoad()
@@ -36,10 +42,8 @@ public final class PopinVRHeadsetViewController: UIViewController {
         }
         self.headTracker = tracker
         self.renderer = renderer
-        let handPipeline = PopinVRHandTrackingPipeline(maximumInferenceRate: 20, maximumHands: 2)
-        self.handPipeline = handPipeline
-        tracker.onFrame = { [weak handPipeline] pixelBuffer, timestamp, intrinsics, cameraTransform in
-            handPipeline?.submit(
+        tracker.onFrame = { [weak self] pixelBuffer, timestamp, intrinsics, cameraTransform in
+            self?.handPipeline?.submit(
                 pixelBuffer: pixelBuffer,
                 timestamp: timestamp,
                 orientation: .up,
@@ -51,7 +55,7 @@ public final class PopinVRHeadsetViewController: UIViewController {
 
     public override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        startWhenAuthorized()
+        prepareAssetsThenRequestCamera()
     }
 
     public override func viewWillDisappear(_ animated: Bool) {
@@ -60,8 +64,36 @@ public final class PopinVRHeadsetViewController: UIViewController {
         hasStartedSession = false
     }
 
+    private func prepareAssetsThenRequestCamera() {
+        guard !isPreparingAssets, preparedAssets == nil else {
+            if preparedAssets != nil { startWhenAuthorized() }
+            return
+        }
+        isPreparingAssets = true
+        showStatus("PopinVR first-run setup\nDownloading and preparing hand-tracking models…\nThis is required before VR can start.")
+        Task { [weak self] in
+            guard let self else { return }
+            do {
+                let assets = try await assetSetup.prepare()
+                let model = try PopinVRHaMeRCoreMLModel(compiledModelAt: assets.compiledHaMeRURL)
+                preparedAssets = assets
+                handPipeline = PopinVRHandTrackingPipeline(
+                    maximumInferenceRate: 20,
+                    maximumHands: 2,
+                    haMeRModel: model
+                )
+                isPreparingAssets = false
+                removeStatus()
+                startWhenAuthorized()
+            } catch {
+                isPreparingAssets = false
+                showStatus("PopinVR setup failed\n\(error.localizedDescription)\n\nCheck your connection and restart setup.")
+            }
+        }
+    }
+
     private func startWhenAuthorized() {
-        guard !hasStartedSession, let tracker = headTracker else { return }
+        guard preparedAssets != nil, !hasStartedSession, let tracker = headTracker else { return }
         guard ARWorldTrackingConfiguration.isSupported else {
             showStatus("ARKit world tracking is not supported on this device")
             return
@@ -99,18 +131,30 @@ public final class PopinVRHeadsetViewController: UIViewController {
     }
 
     private func showStatus(_ message: String) {
-        let label = UILabel()
+        let label = statusLabel ?? UILabel()
         label.text = message
         label.textColor = .white
         label.textAlignment = .center
         label.numberOfLines = 0
+        label.font = .systemFont(ofSize: 16, weight: .medium)
+        label.backgroundColor = UIColor.black.withAlphaComponent(0.82)
+        label.layer.cornerRadius = 14
+        label.layer.masksToBounds = true
         label.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(label)
-        NSLayoutConstraint.activate([
-            label.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            label.centerYAnchor.constraint(equalTo: view.centerYAnchor),
-            label.leadingAnchor.constraint(greaterThanOrEqualTo: view.leadingAnchor, constant: 24),
-            label.trailingAnchor.constraint(lessThanOrEqualTo: view.trailingAnchor, constant: -24)
-        ])
+        if label.superview == nil {
+            view.addSubview(label)
+            NSLayoutConstraint.activate([
+                label.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+                label.centerYAnchor.constraint(equalTo: view.centerYAnchor),
+                label.leadingAnchor.constraint(greaterThanOrEqualTo: view.leadingAnchor, constant: 24),
+                label.trailingAnchor.constraint(lessThanOrEqualTo: view.trailingAnchor, constant: -24)
+            ])
+        }
+        statusLabel = label
+    }
+
+    private func removeStatus() {
+        statusLabel?.removeFromSuperview()
+        statusLabel = nil
     }
 }
