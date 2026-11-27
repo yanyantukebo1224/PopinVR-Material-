@@ -10,7 +10,7 @@ let package = Package(
             name: "PopinVRCore",
             path: "Sources/PopinVRCore",
             resources: [.process("Shaders")],
-            linkerSettings: [.linkedFramework("ARKit"), .linkedFramework("Vision"), .linkedFramework("MetalKit"), .linkedFramework("CoreML"), .linkedFramework("AVFoundation"), .linkedFramework("UIKit"), .linkedFramework("SwiftUI")]
+            linkerSettings: [.linkedFramework("ARKit"), .linkedFramework("Vision"), .linkedFramework("MetalKit"), .linkedFramework("CoreML"), .linkedFramework("AVFoundation"), .linkedFramework("UIKit"), .linkedFramework("SwiftUI"), .linkedFramework("CoreImage"), .linkedFramework("CoreGraphics")]
         )
     ]
 )
