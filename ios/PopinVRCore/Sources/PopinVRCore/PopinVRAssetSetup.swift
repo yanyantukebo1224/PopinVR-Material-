@@ -86,7 +86,7 @@ public final class PopinVRAssetSetup: ObservableObject {
             if !fileManager.fileExists(atPath: compiledURL.path) {
                 state = .compilingModel
                 detail = "Compiling HaMeR for this iPhone. First launch can take a while…"
-                let temporary = try MLModel.compileModel(at: modelPackage)
+                let temporary = try await MLModel.compileModel(at: modelPackage)
                 if fileManager.fileExists(atPath: compiledURL.path) {
                     try fileManager.removeItem(at: compiledURL)
                 }
@@ -95,7 +95,7 @@ public final class PopinVRAssetSetup: ObservableObject {
             if !fileManager.fileExists(atPath: compiledSOMAURL.path) {
                 state = .compilingModel
                 detail = "Compiling SOMA-X hand regressor…"
-                let temporary = try MLModel.compileModel(at: somaRegressor)
+                let temporary = try await MLModel.compileModel(at: somaRegressor)
                 if fileManager.fileExists(atPath: compiledSOMAURL.path) {
                     try fileManager.removeItem(at: compiledSOMAURL)
                 }
