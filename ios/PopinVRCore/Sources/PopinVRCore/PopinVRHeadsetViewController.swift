@@ -9,6 +9,7 @@ public final class PopinVRHeadsetViewController: UIViewController {
     private var headTracker: PopinVRHeadTracker?
     private var renderer: PopinVRStereoHeadsetRenderer?
     private var metalView: MTKView?
+    private var handPipeline: PopinVRHandTrackingPipeline?
     private var hasStartedSession = false
 
     public override func viewDidLoad() {
@@ -35,6 +36,17 @@ public final class PopinVRHeadsetViewController: UIViewController {
         }
         self.headTracker = tracker
         self.renderer = renderer
+        let handPipeline = PopinVRHandTrackingPipeline(maximumInferenceRate: 20, maximumHands: 2)
+        self.handPipeline = handPipeline
+        tracker.onFrame = { [weak handPipeline] pixelBuffer, timestamp, intrinsics, cameraTransform in
+            handPipeline?.submit(
+                pixelBuffer: pixelBuffer,
+                timestamp: timestamp,
+                orientation: .up,
+                cameraIntrinsics: intrinsics,
+                worldFromCamera: cameraTransform
+            )
+        }
     }
 
     public override func viewDidAppear(_ animated: Bool) {
