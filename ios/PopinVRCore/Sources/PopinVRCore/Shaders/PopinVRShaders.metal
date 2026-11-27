@@ -24,7 +24,6 @@ vertex GridVertexOut popinvr_grid_vertex(
 
 fragment float4 popinvr_grid_fragment(
     GridVertexOut in [[stage_in]],
-    constant float &floorHeight [[buffer(0)]]
 ) {
     float axisX = abs(in.worldPosition.x) < 0.015 ? 1.0 : 0.0;
     float axisZ = abs(in.worldPosition.z) < 0.015 ? 1.0 : 0.0;
