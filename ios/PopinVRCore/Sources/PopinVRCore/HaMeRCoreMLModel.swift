@@ -58,7 +58,7 @@ public final class PopinVRHaMeRCoreMLModel {
         }
 
         let input = try MLMultiArray(
-            shape: inputShape.map(NSNumber.init(value:)),
+            shape: inputShape.map { NSNumber(value: $0) },
             dataType: .float32
         )
         let destination = input.dataPointer.bindMemory(to: Float.self, capacity: input.count)
