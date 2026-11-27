@@ -1,0 +1,28 @@
+name: iOS Core Package
+
+on:
+  push:
+    branches: [main, "popinvr/**"]
+    paths:
+      - "ios/PopinVRCore/**"
+      - ".github/workflows/ios-core-ci.yml"
+  pull_request:
+    paths:
+      - "ios/PopinVRCore/**"
+      - ".github/workflows/ios-core-ci.yml"
+  workflow_dispatch:
+
+jobs:
+  build-ios-package:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Show Xcode version
+        run: xcodebuild -version
+      - name: Build for iOS Simulator
+        run: |
+          xcodebuild \
+            -scheme PopinVRCore \
+            -destination 'generic/platform=iOS Simulator' \
+            -derivedDataPath "$RUNNER_TEMP/PopinVRDerivedData" \
+            build
