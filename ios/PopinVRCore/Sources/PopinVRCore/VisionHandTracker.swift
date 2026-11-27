@@ -32,7 +32,7 @@ public final class PopinVRVisionHandTracker {
 
     public func detect(
         in pixelBuffer: CVPixelBuffer,
-        orientation: CGImagePropertyOrientation = .right
+        orientation: CGImagePropertyOrientation = .up
     ) throws -> [PopinVRHandObservation] {
         let handler = VNImageRequestHandler(
             cvPixelBuffer: pixelBuffer,
